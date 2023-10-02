@@ -19,9 +19,9 @@ class ProductServiceImpl implements ProductService
     public function addProductIntoCart(CartRequest $cartRequest)
     {
 
+
         // Lấy thông tin lựa chọn sản phẩm từ yêu cầu của người dùng
         $options = $cartRequest->options;
-
         // Tạo truy vấn để kiểm tra sự tồn tại của sản phẩm
         $query = DB::table('product_item_detail as pd1')
                 ->select('pd1.product_item_id');
@@ -51,18 +51,42 @@ class ProductServiceImpl implements ProductService
                 "message" => "Too much quantity in stock"
             ], 404);
         }
-         $user=auth()->user();
-         $cart_item=[
-             "quantity"=>$cartRequest->quantity,
-             "user_id"=>$user->id,
-             "product_item_id"=>$items->product_item_id
-         ];
-         Cart_item::create($cart_item);
+        $user=auth()->user();
+        $cart_item=[
+            "quantity"=>$cartRequest->quantity,
+            "user_id"=>$user->id,
+            "product_item_id"=>$items->product_item_id
+        ];
 
-        // Trả về phản hồi JSON với thông tin về sản phẩm đã thêm vào giỏ hàng hoặc thông báo lỗi
-        return response()->json([
-            "message"=>$cart_item
-        ],200);
+
+         // kiểm tra xem items đã có trong cart hay chưa
+        $cart_item_in_cart=Cart_item::where('product_item_id',$items->product_item_id)->first();
+         if($cart_item_in_cart){
+             $product_item=$cart_item_in_cart->product_item;
+             if(($cart_item_in_cart->quantity+$cartRequest->quantity) >$product_item->quantity){
+                 return response()->json([
+                     "message" => "Too much quantity in stock"
+                 ], 404);
+             }
+             $cart_item_in_cart->quantity=$cart_item_in_cart->quantity+$cartRequest->quantity;
+             $cart_item_in_cart->save();
+             // Trả về phản hồi JSON với thông tin về sản phẩm đã thêm vào giỏ hàng hoặc thông báo lỗi
+             return response()->json([
+                 "message"=>"Insert product into cart successfully",
+                 "data"=>$cart_item_in_cart
+             ],200);
+         }else{
+             Cart_item::create($cart_item);
+             // Trả về phản hồi JSON với thông tin về sản phẩm đã thêm vào giỏ hàng hoặc thông báo lỗi
+             return response()->json([
+                 "message"=>"Insert product into cart successfully",
+                 "message"=>$cart_item
+             ],200);
+         }
+
+
+
+
     }
 
     /**
