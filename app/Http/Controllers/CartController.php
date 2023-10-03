@@ -5,16 +5,16 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CartRequest;
 use App\Models\Category;
 use App\Models\Product;
-use App\Services\ProductService;
-use App\Services\ServiceImpl\ProductServiceImpl;
+use App\Services\CartService;
+use App\Services\ServiceImpl\CartServiceImpl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ProductController extends Controller
+class CartController extends Controller
 {
     protected $productService;
 
-    public function __construct(ProductService $productService)
+    public function __construct(CartService $productService)
 {
     $this->productService=$productService;
 }
@@ -66,11 +66,14 @@ class ProductController extends Controller
         return $this->productService->addProductIntoCart($cartRequest);
     }
 
-    public function getAllProductInCart(){
-        return $this->productService->getAllProductInCart();
+    public function getAllProductInCarts($currentPage,$perPage){
+        return $this->productService->getAllProductInCart($currentPage,$perPage);
     }
     public function updateQuantityProduct($product_item_id,Request $request){
         return $this->productService->updateQuantityProduct($request->quantity,$product_item_id);
+    }
+    public function deleteProductInCart($product_item_id){
+        return $this->productService->deleteProductInCart($product_item_id);
     }
 
 }

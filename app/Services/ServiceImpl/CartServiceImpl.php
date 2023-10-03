@@ -5,10 +5,10 @@ namespace App\Services\ServiceImpl;
 use App\Http\Requests\CartRequest;
 use App\Models\Cart_item;
 use App\Models\Product_item;
-use App\Services\ProductService;
+use App\Services\CartService;
 use Illuminate\Support\Facades\DB;
 
-class ProductServiceImpl implements ProductService
+class CartServiceImpl implements CartService
 {
     /**
      * Thêm sản phẩm vào giỏ hàng dựa trên yêu cầu từ người dùng.
@@ -94,13 +94,26 @@ class ProductServiceImpl implements ProductService
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getAllProductInCart()
+    public function getAllProductInCart($currentPage,$perPage)
     {
         $cart = Cart_item::with(['product_item.product' => function ($query) {
             $query->select('id', 'name', 'image_url'); // Chọn các trường cần thiết từ product
-        }])->get(['id', 'quantity', 'product_item_id', 'user_id']); // Chọn các trường cần thiết từ cart_item
+        }])
+            ->get(['id', 'quantity', 'product_item_id', 'user_id']);
+//            ->paginate(1, ['*'], 'page', 1);;
+
+        $totalItems = $cart->count();
+        $cartItems = $cart->forPage($currentPage, $perPage);
+
+        $cartItems = new \Illuminate\Pagination\LengthAwarePaginator(
+            $cartItems,
+            $totalItems,
+            $perPage,
+            $currentPage
+        );
+        // Chọn các trường cần thiết từ cart_item
         return response()->json([
-            "data" => $cart
+            "data" => $cartItems
         ], 200);
 
     }
@@ -124,6 +137,20 @@ class ProductServiceImpl implements ProductService
         return response()->json([
             "message"=>"update quantity successfully",
             "data"=>$cart_item
+        ],200);
+    }
+
+    public function deleteProductInCart($product_item_id)
+    {
+        $productItem=Cart_item::where('product_item_id',$product_item_id)->first();
+        if(!$productItem){
+            return response()->json([
+                "message"=>"We cant find the product item"
+            ],200);
+        }
+        $productItem->delete();
+        return response()->json([
+            "message"=>"delete product succcessfully"
         ],200);
     }
 }

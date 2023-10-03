@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Services\ProductService;
-use App\Services\ServiceImpl\ProductServiceImpl;
+use App\Services\CartService;
+use App\Services\ServiceImpl\CartServiceImpl;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
-        $this->app->singleton(ProductService::class,ProductServiceImpl::class);
+        $this->app->singleton(CartService::class,CartServiceImpl::class);
     }
 
     /**

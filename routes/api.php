@@ -27,13 +27,17 @@ Route::post('signUp',[UserController::class,'signUp']);
 //});
 Route::middleware(['cors', 'json.response','auth:api'])->group(function(){
     Route::get('userDetail',[UserController::class,'userDetail']);
-    Route::post('insertCate',[\App\Http\Controllers\ProductController::class,'insertCate']);
-    Route::post('createProduct',[\App\Http\Controllers\ProductController::class,'createProduct']);
-    Route::post('addProductIntoCart',[\App\Http\Controllers\ProductController::class,'addProductIntoCart']);
-    Route::get('getAllProductInCart',[\App\Http\Controllers\ProductController::class,'getAllProductInCart']);
-    Route::put('updateQuantityProduct/{product_item_id}',[\App\Http\Controllers\ProductController::class,'updateQuantityProduct']);
+    Route::post('insertCate',[\App\Http\Controllers\CartController::class,'insertCate']);
+    Route::post('createProduct',[\App\Http\Controllers\CartController::class,'createProduct']);
+    Route::post('addProductIntoCart',[\App\Http\Controllers\CartController::class,'addProductIntoCart']);
+    Route::get('getAllProductInCart/{perPage}/{currentPage}', [\App\Http\Controllers\CartController::class, 'getAllProductInCarts'])
+        ->where('perpage', '[0-9]+') // Đảm bảo perpage là số nguyên dương
+        ->where('currentpage', '[0-9]+'); // Đảm bảo currentpage là số nguyên dương
+
+    Route::put('updateQuantityProduct/{product_item_id}',[\App\Http\Controllers\CartController::class,'updateQuantityProduct']);
+    Route::delete('deleteProductInCart/{product_item_id}',[\App\Http\Controllers\CartController::class,'deleteProductInCart']);
 
 
 });
-Route::post('comment',[\App\Http\Controllers\ProductController::class,'ratingProduct']);
+Route::post('comment',[\App\Http\Controllers\CartController::class,'ratingProduct']);
 
